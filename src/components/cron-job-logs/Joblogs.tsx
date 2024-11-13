@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState, useMemo } from "react";
-import { fetchMessageBodyObject } from "../../hooks/customobjects.hooks";
+import { deleteAllCustomObjects, fetchMessageBodyObject } from "../../hooks/customobjects.hooks";
 import { useAsyncDispatch } from '@commercetools-frontend/sdk';
 import LoadingSpinner from '@commercetools-uikit/loading-spinner';
 import DataTable from '@commercetools-uikit/data-table';
@@ -17,12 +17,11 @@ const ITEMS_PER_PAGE = 10;
 
 interface LogValue {
   timestamp: string;
-  status: 'success' | 'error';
+  status: 'success' | 'failed';
   message: string;
   details: {
-    s3UploadStatus: boolean;
-    duration: number;
-    ordersProcessed?: number;
+    durationInMilliseconds: number;
+    totalOrdersProcessed?: number;
     error?: string;
   };
 }
@@ -39,8 +38,8 @@ const columns = [
   { key: 'time', label: 'Time', isSortable: true },
   { key: 'status', label: 'Status', isSortable: true },
   { key: 'message', label: 'Message', isSortable: true },
-  { key: 's3UploadStatus', label: 'S3 Upload Status', isSortable: true },
   { key: 'duration', label: 'Duration (ms)', isSortable: true },
+  { key: 'totalOrdersProcessed', label: 'Total Orders Processed', isSortable: true },
 ] as const;
 
 type RowData = {
@@ -49,8 +48,8 @@ type RowData = {
   time: string;
   status: string;
   message: string;
-  s3UploadStatus: string;
   duration: string;
+  totalOrdersProcessed?: number;
 };
 
 const JobLogs = () => {
@@ -58,7 +57,7 @@ const JobLogs = () => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   // New state variables for enhanced functionality
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(ITEMS_PER_PAGE);
@@ -74,6 +73,7 @@ const JobLogs = () => {
   const loadLogs = useCallback(async () => {
     try {
       const results = await fetchMessageBodyObject(dispatch);
+      console.log(results);
       setLogs(results);
       setError(null);
     } catch (err) {
@@ -96,11 +96,10 @@ const JobLogs = () => {
       time: timestamp.toLocaleTimeString(),
       status: log.value.status,
       message: log.value.message,
-      s3UploadStatus: log.value.details.s3UploadStatus ? 'Success' : 'Failed',
-      duration: `${log.value.details.duration}`,
+      duration: `${log.value.details.durationInMilliseconds}`,
+      totalOrdersProcessed: log.value.status === 'success' ? log.value.details.totalOrdersProcessed : undefined, // Add condition for success
     };
   }), [logs]);
-  
 
   const filteredRows = useMemo(() => {
     let filtered = [...rows];
@@ -110,7 +109,7 @@ const JobLogs = () => {
     } else if (filterField === 'all' && searchTerm) {
       const searchLower = searchTerm.toLowerCase();
       filtered = filtered.filter(row =>
-        Object.values(row).some(value => 
+        Object.values(row).some(value =>
           String(value).toLowerCase().includes(searchLower)
         )
       );
@@ -173,16 +172,16 @@ const JobLogs = () => {
           {paginatedRows.length > 0 && (
             <SecondaryButton
               iconLeft={<ExportIcon />}
-              label="View Bucket"
-              onClick={() => console.log("Export functionality here")}
+              label="Delete Log"
+              onClick={() => deleteAllCustomObjects(dispatch)}
             />
           )}
         </div>
       </div>
-     
+
       <DataTableManager columns={[...columns]}>
         <DataTable
-          columns={columns}
+          columns={Array.from(columns)} 
           rows={paginatedRows}
           sortedBy={sortBy.key}
           sortDirection={sortBy.order}
@@ -190,16 +189,12 @@ const JobLogs = () => {
           itemRenderer={(item: RowData, column) => {
             const value = item[column.key as keyof RowData];
             if (column.key === 'status') {
-              return <span style={{ color: value === 'error' ? 'red' : 'green' }}>{value}</span>;
-            }
-            if (column.key === 's3UploadStatus') {
-              return <span style={{ color: value === 'Success' ? 'green' : 'red' }}>{value}</span>;
+              return <span style={{ color: value === 'failed' ? 'red' : 'green' }}>{value}</span>;
             }
             return value;
           }}
         />
       </DataTableManager>
-     
 
       <Pagination
         page={page}
@@ -209,11 +204,10 @@ const JobLogs = () => {
         totalItems={filteredRows.length}
       />
 
-<Text.Headline as="h2">Success vs. Failure Distribution</Text.Headline>
+      <Text.Headline as="h2">Success vs. Failure Distribution</Text.Headline>
       <LogsChart logs={logs} />
 
-       <HistoChart logs={logs}/> 
-
+      <HistoChart logs={logs} />
     </Spacings.Stack>
   );
 };

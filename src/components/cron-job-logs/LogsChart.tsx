@@ -7,12 +7,12 @@ interface LogsChartProps {
 
 interface LogValue {
   timestamp: string;
-  status: 'success' | 'error';
+  status: 'success' | 'failed';
   message: string;
   details: {
-    s3UploadStatus: boolean;
-    duration: number;
-    ordersProcessed?: number;
+    durationInMilliseconds: number;
+    totalOrdersProcessed
+?: number;
     error?: string;
   };
 }
@@ -28,7 +28,7 @@ const LogsChart: React.FC<LogsChartProps> = ({ logs }) => {
   // Calculate the success and failure counts
   const chartData = useMemo(() => {
     const successCount = logs.filter(log => log.value.status === 'success').length;
-    const failureCount = logs.filter(log => log.value.status === 'error').length;
+    const failureCount = logs.filter(log => log.value.status === 'failed').length;
 
     return [
       { name: 'Success', value: successCount },

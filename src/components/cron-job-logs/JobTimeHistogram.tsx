@@ -7,12 +7,12 @@ interface LogsChartProps {
 
 interface LogValue {
   timestamp: string;
-  status: 'success' | 'error';
+  status: 'success' | 'failed';
   message: string;
   details: {
-    s3UploadStatus: boolean;
-    duration: number; // Duration in ms
-    ordersProcessed?: number;
+    durationInMilliseconds: number;
+    totalOrdersProcessed
+?: number;
     error?: string;
   };
 }
@@ -36,7 +36,7 @@ const HistoChart: React.FC<LogsChartProps> = ({ logs }) => {
     }
 
     logs.forEach(log => {
-      const duration = log.value.details.duration; // duration in ms
+      const duration = log.value.details.durationInMilliseconds; // duration in ms
       const durationInMinutes = Math.floor(duration / 60000); // Convert ms to minutes
 
       // If the duration is within 30 minutes, add it to the respective bin
