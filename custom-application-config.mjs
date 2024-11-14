@@ -4,16 +4,16 @@ import { PERMISSIONS, entryPointUriPath } from './src/constants';
  * @type {import('@commercetools-frontend/application-config').ConfigOptionsForCustomApplication}
  */
 const config = {
-  name: 'Starter Typescript 225680',
+  name: 'CT-ML-Integration',
   entryPointUriPath,
   cloudIdentifier: 'gcp-eu',
   env: {
     development: {
-      initialProjectKey: 'poc-ct-ml-integration',
+      initialProjectKey: '${env:PROJECT_ID}',
     },
     production: {
-      applicationId: 'TODO',
-      url: 'https://your_app_hostname.com',
+      applicationId: '${env:APPLICATION_ID}',
+      url: 'https://poc-ct-merchant-center.vercel.app',
     },
   },
   oAuthScopes: {
