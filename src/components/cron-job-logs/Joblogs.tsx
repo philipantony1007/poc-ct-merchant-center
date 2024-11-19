@@ -204,10 +204,11 @@ const JobLogs = () => {
         totalItems={filteredRows.length}
       />
 
-      <Text.Headline as="h2">Success vs. Failure Distribution</Text.Headline>
-      <LogsChart logs={logs} />
 
       <HistoChart logs={logs} />
+     
+      <LogsChart logs={logs} />
+
     </Spacings.Stack>
   );
 };

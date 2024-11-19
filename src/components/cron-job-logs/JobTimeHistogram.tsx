@@ -35,7 +35,7 @@ const HistoChart: React.FC<LogsChartProps> = ({ logs }) => {
 
       return {
         timestamp: formattedTimestamp, // Format timestamp as DD-MM-YYYY
-        duration: log.value.details.durationInMilliseconds / 1000, // Convert duration to seconds
+        date: log.value.details.durationInMilliseconds / 1000, // Convert duration to seconds
         status: log.value.status, // Include status to determine bar color
       };
     });
@@ -44,7 +44,7 @@ const HistoChart: React.FC<LogsChartProps> = ({ logs }) => {
   return (
     <div style={{ padding: '20px' }}>
       {/* Heading */}
-      <h2 style={{ textAlign: 'left' }}>Log Entry Duration Chart</h2>
+      <h2 style={{ textAlign: 'left' }}>Histogram - Job Execution Time</h2>
 
       {/* Chart */}
       <ResponsiveContainer width="100%" height={500}>
@@ -77,7 +77,7 @@ const HistoChart: React.FC<LogsChartProps> = ({ logs }) => {
           />
           <Tooltip formatter={(value) => `${value} sec`} /> {/* Update tooltip to show seconds */}
           <Legend />
-          <Bar dataKey="duration" barSize={60}>
+          <Bar dataKey="date" barSize={60}>
             {chartData.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.status === 'failed' ? '#FF4C4C' : '#4CAF50'} />
             ))}

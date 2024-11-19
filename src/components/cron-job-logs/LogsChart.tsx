@@ -40,7 +40,10 @@ const LogsChart: React.FC<LogsChartProps> = ({ logs }) => {
   const COLORS = ['#4CAF50', '#F44336'];
 
   return (
+    <>
+     <h2 style={{ textAlign: 'left' }}>Success vs. Failure Distribution</h2>
     <ResponsiveContainer width="100%" height={300}>
+      
       <PieChart>
      
         <Pie
@@ -60,6 +63,7 @@ const LogsChart: React.FC<LogsChartProps> = ({ logs }) => {
         <Legend />
       </PieChart>
     </ResponsiveContainer>
+    </>
   );
 };
 
